@@ -1,12 +1,18 @@
 {
-    "todos": [
-        "first task",
-        "third task",
-        "fifth task"
-    ],
-    "completed": [
-        "second task",
-        "fourth task",
-        "sixth task"
-    ]
+    "abdallah": {
+        "todos": [
+            "new task"
+        ],
+        "completed": []
+    },
+    "abdoo": {
+        "todos": [
+            "task 2",
+            "task 6"
+        ],
+        "completed": [
+            "task 1",
+            "task 4"
+        ]
+    }
 }

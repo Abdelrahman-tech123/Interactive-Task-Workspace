@@ -3,28 +3,28 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
-
 export default function ToDoPage() {
     const [todos, setTodos] = useState([]);
     const [checked, setChecked] = useState([]);
 
-    // 1. Create a flag to track if the initial load is done
+    // 1. Manage the active user state (Defaulting to 'abdallah')
+    const [username, setUsername] = useState('user');
+    const [userInput, setUserInput] = useState('');
+
     const syncStatus = useRef('idle');
 
+    // EFFECT 1: Runs on mount AND whenever the active username changes
     useEffect(() => {
-        // fetch initial todo tasks from the api
         const fetchItems = async () => {
-            if (syncStatus.current !== 'idle') return; // Prevent double-triggering in StrictMode
             syncStatus.current = 'fetching';
-
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/todos/");
+                // Appending the specific username to the API path
+                const response = await axios.get(`http://127.0.0.1:8000/api/todos/${username}`);
                 if (response.status === 200) {
                     const data = response.data;
                     setTodos(data.todos || []);
                     setChecked(data.completed || []);
 
-                    // Mark as safely loaded ONLY after states have been fully set
                     setTimeout(() => {
                         syncStatus.current = 'loaded';
                     }, 100);
@@ -36,17 +36,17 @@ export default function ToDoPage() {
             }
         }
         fetchItems();
-    }, []);
+    }, [username]); // Listens to user switches!
 
 
-    // EFFECT 2: Runs whenever todos or checked lists change
+    // EFFECT 2: Syncs code to backend safely when state values update
     useEffect(() => {
-        // 3. BLOCK the POST request if the initial data hasn't arrived yet
         if (syncStatus.current !== 'loaded') return;
 
         const postItems = async () => {
             try {
-                await axios.post("http://127.0.0.1:8000/api/todos/", {
+                // Posting directly to that explicit user's endpoint
+                await axios.post(`http://127.0.0.1:8000/api/todos/${username}`, {
                     todos: todos,
                     completed: checked
                 });
@@ -56,11 +56,20 @@ export default function ToDoPage() {
         };
 
         postItems();
-    }, [todos, checked]); // Listens to local changes safely now!
+    }, [todos, checked, username]);
+
+    // Handle switching workspaces safely
+    const handleUserSwitch = () => {
+        const cleanName = userInput.trim().lowerCaseOrSimilar || userInput.trim().toLowerCase();
+        if (cleanName !== '') {
+            syncStatus.current = 'idle'; // Reset status bar to lock posts during switch
+            setUsername(cleanName);
+        }
+    };
 
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-            handleInputTask(e);
+            handleInputTask();
         }
     };
 
@@ -85,7 +94,6 @@ export default function ToDoPage() {
         }
     };
 
-    // This handles the manual drag and drop sorting
     const handleOnDragEnd = (result, listType) => {
         if (!result.destination) return;
 
@@ -108,9 +116,31 @@ export default function ToDoPage() {
                 <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Task Workspace
                 </h1>
-                <p className="text-sm text-slate-500 mt-1">Drag and drop to rearrange your tasks.</p>
+                <p className="text-sm text-slate-500 mt-1">
+                    Active Session: <span className="font-bold text-blue-600 uppercase">{username}</span>
+                </p>
             </div>
 
+            {/* USER SWITCHER ACCORDION ELEMENT */}
+            <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-4">
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        className="flex-1 border border-slate-200 p-2.5 rounded-xl text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-xs font-medium"
+                        placeholder="Switch username..."
+                    />
+                    <button
+                        onClick={handleUserSwitch}
+                        className="bg-indigo-600 text-white px-4 py-2.5 rounded-xl hover:bg-indigo-700 active:scale-[0.98] transition-all font-semibold text-xs shadow-sm shadow-indigo-500/10"
+                    >
+                        Load Space
+                    </button>
+                </div>
+            </div>
+
+            {/* TASK INPUT FIELD */}
             <div className="w-full max-w-md bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6 transition-all hover:shadow-md">
                 <div className="flex flex-col sm:flex-row gap-2">
                     <input
@@ -118,7 +148,7 @@ export default function ToDoPage() {
                         id="task-input"
                         type="text"
                         className="flex-1 border border-slate-200 p-3 rounded-xl text-slate-900 bg-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all text-sm"
-                        placeholder="What needs to be done?"
+                        placeholder={`Assign task to ${username}...`}
                     />
                     <button
                         onClick={handleInputTask}
@@ -149,7 +179,6 @@ export default function ToDoPage() {
                                                             }`}
                                                     >
                                                         <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                                                            {/* Custom CSS Drag Handle Icon */}
                                                             <div className="grid grid-cols-2 gap-0.5 w-2.5 opacity-40 group-hover:opacity-70 transition-opacity shrink-0">
                                                                 <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
                                                                 <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
@@ -204,7 +233,6 @@ export default function ToDoPage() {
                                                             }`}
                                                     >
                                                         <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                                                            {/* Custom CSS Drag Handle Icon */}
                                                             <div className="grid grid-cols-2 gap-0.5 w-2.5 opacity-20 group-hover:opacity-40 transition-opacity shrink-0">
                                                                 <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
                                                                 <div className="w-1 h-1 bg-slate-400 rounded-full"></div>
