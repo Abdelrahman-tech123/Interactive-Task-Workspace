@@ -5,3 +5,7 @@ dependencies = []
 
 [tool.vercel]
 entrypoint = "api.app.main:app"
+
+# 👇 This forces Vercel to use Node 18 for the helper execution wrapper
+[engines]
+node = "18.x"
