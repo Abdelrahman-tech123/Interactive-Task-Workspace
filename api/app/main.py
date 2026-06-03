@@ -10,6 +10,7 @@ app = FastAPI(
 origins = [
     "http://localhost:3001",
     "http://127.0.0.1:3001",
+    "https://interactive-task-workspace.vercel.app"
 ]
 # Configure CORS so your Frontend (Next.js) can communicate with it safely
 app.add_middleware(
