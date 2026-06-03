@@ -14,7 +14,7 @@ router = APIRouter(
 # Replace with your production connection string (e.g., from Neon, Supabase, or Aiven)
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
-    "postgresql://neondb_owner:npg_uM0FONPfLVv1@ep-shiny-sunset-a2ccenns.eu-central-1.aws.neon.tech/neondb?sslmode=require"
+    "postgresql+psycopg2://neondb_owner:npg_uM0FONPfLVv1@ep-shiny-sunset-a2ccenns.eu-central-1.aws.neon.tech/neondb?sslmode=require"
 )
 
 engine = create_engine(DATABASE_URL)
