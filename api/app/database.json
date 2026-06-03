@@ -1,0 +1,12 @@
+{
+    "todos": [
+        "first task",
+        "third task",
+        "fifth task"
+    ],
+    "completed": [
+        "second task",
+        "fourth task",
+        "sixth task"
+    ]
+}
