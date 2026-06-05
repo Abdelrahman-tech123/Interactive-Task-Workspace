@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routers import todos
 
+# uvicorn app.main:app --reload
+
 app = FastAPI(
     title="Todo API Server",
     description="A fast backend for handling user tasks",
