@@ -4,10 +4,11 @@ import axios from 'axios';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 
 export default function ToDoPage() {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
     const [todos, setTodos] = useState([]);
     const [checked, setChecked] = useState([]);
 
-    // 1. Manage the active user state (Defaulting to 'abdallah')
+    // 1. Manage the active user state (Defaulting to 'user')
     const [username, setUsername] = useState('user');
     const [userInput, setUserInput] = useState('');
 
@@ -19,7 +20,7 @@ export default function ToDoPage() {
             syncStatus.current = 'fetching';
             try {
                 // Appending the specific username to the API path
-                const response = await axios.get(`http://127.0.0.1:8000/api/todos/${username}`);
+                const response = await axios.get(`${API_BASE_URL}/api/todos/${username}`);
                 if (response.status === 200) {
                     const data = response.data;
                     setTodos(data.todos || []);
@@ -46,7 +47,7 @@ export default function ToDoPage() {
         const postItems = async () => {
             try {
                 // Posting directly to that explicit user's endpoint
-                await axios.post(`http://127.0.0.1:8000/api/todos/${username}`, {
+                await axios.post(`${API_BASE_URL}/api/todos/${username}`, {
                     todos: todos,
                     completed: checked
                 });
